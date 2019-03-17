@@ -56,6 +56,7 @@ public static <T> Stream<T> breakStream(Stream<T> stream, Predicate<T> terminate
 
     @Override
     public T next() { 
+       // System.out.println(".............next()"); 
       if (hasValue) { 
         hasValue = false;
         return t;

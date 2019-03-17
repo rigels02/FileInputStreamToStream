@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -32,11 +34,12 @@ public class SDFStreamIT {
     public static void setUpClass() throws FileNotFoundException, IOException {
         BufferedWriter bw = new BufferedWriter( new FileWriter(DATA));
         Random rand = new Random();
+        for(int r=1; r<=5; r++){
         for(int i=1; i<= 10;i++){
            bw.write(">  <Prop_"+i+">\n");
           switch(i){
               case 1:
-                  bw.write("HB0000"+rand.nextInt(100)+"\n");
+                  bw.write("HB0000"+r+"\n");
                   break;
               case 2:
                   bw.write(Float.toString((float)Math.random()*10)+"\n");
@@ -44,6 +47,8 @@ public class SDFStreamIT {
               default:
                   bw.write("Val_"+i+"\n");
           }
+        }
+        bw.write("$$$$\n\n");
         }
         bw.flush();
         bw.close();
@@ -72,6 +77,52 @@ public class SDFStreamIT {
         Iterator<String> itr = coll.stream().iterator();
         itr.forEachRemaining(e -> System.out.println("=>> "+e));
         
+        Stream<String> tstream = coll.stream();
+        List<List<String>> result = new ArrayList<>();
+        getRecsList(tstream, result);
+           
+        System.out.println("====================================");
+        result.forEach((strings) -> {
+            strings.forEach((el) -> {
+                System.out.println(">>>>> "+el);
+            });
+        });
+    }
+
+    private void getRecsList(Stream<String> tstream, List<List<String>> result) {
+        Iterator<String> it = tstream.iterator();
+        List<String> els = new ArrayList<>();
+        while(it.hasNext()){
+            
+            String el = it.next();
+            if(!el.contains("$$$$")){
+                if( !el.trim().isEmpty())
+                    els.add(el);
+            }else{
+                result.add(els);
+                els = new ArrayList<>();
+               
+            }
+        }
+    }
+    
+    @Test
+    public void testStream_1() throws FileNotFoundException{
+    SDFStream sdfStream = new SDFStream();
+        BufferedReader br = new BufferedReader(new FileReader(DATA));
+        //Predicate<String> p1 = e -> e!=null;
+        Stream<String> stream = sdfStream.toStream(br);
+        List<List<String>> result = new ArrayList<>();
+       // List<String> coll = stream.collect(Collectors.toList());
+        getRecsList(stream, result);
+        stream.close();
+         
+        System.out.println("====================================");
+        result.forEach((strings) -> {
+            strings.forEach((el) -> {
+                System.out.println(">>>>> "+el);
+            });
+        });
     }
     
     @Test
