@@ -23,6 +23,10 @@ public class SDFStream {
         Stream<String> stream1 = Stream.generate(() -> readLine(stream)).onClose(
               () -> close(stream));
         
+        /**
+         * Make infinite stream finit. Break it when no more string - it is null.
+         * It happens when EOF reached.
+         */
         Stream<String> breaked = breakStream(stream1, new Predicate<String>() {
             @Override
             public boolean test(String t) {
